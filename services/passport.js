@@ -22,20 +22,16 @@ passport.use( new GoogleStrategy({
   clientSecret:keys.googleClientSecret,
   callbackURL:'/auth/google/callback',
   proxy:true
-},(accessToken,refreshToken,profile,done)=>{
-  User.findOne({googleId:profile.id})
-  .then((existingUser) =>{
+},
+async(accessToken,refreshToken,profile,done)=>{
+  const existingUser = await User.findOne({googleId:profile.id})
+
     if(existingUser){
       //we already have a record with same id
-      console.log('existingUser',existingUser);
-  done(null,existingUser);
-    }else{
+    return  done(null,existingUser);
+    } 
       //we document, make a new record
-      new User({googleId:profile.id})
-      .save().    //create a new modal instance 
-      then ((user)=> done(null,user));
-    }
-  } )
- 
-
+      const user = await new User({googleId:profile.id}).save();  //create a new modal instance 
+      done(null,user);
+    
 }));
